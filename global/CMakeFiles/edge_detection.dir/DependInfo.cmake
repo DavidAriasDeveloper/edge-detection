@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/david/Projects/c/cuda/edge_detection/global/main.cpp" "/home/david/Projects/c/cuda/edge_detection/global/CMakeFiles/edge_detection.dir/main.cpp.o"
+  "/home/david/Projects/c/cuda/edge-detection/global/main.cpp" "/home/david/Projects/c/cuda/edge-detection/global/CMakeFiles/edge_detection.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

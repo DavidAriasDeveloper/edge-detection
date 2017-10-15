@@ -11,13 +11,15 @@ using namespace std;
 
 Mat imageRGBA;
 Mat imageGray;
+Mat imageEdge;
 
 uchar4 *d_rgbaImage__;
 unsigned char *d_grayImage__;
+unsigned char *d_edgeImage__;
 
 //Retorna un puntero de la version RGBA de la imagen de entrada y un puntero a la imagen de salida para host y gpu
 
-void preProcess(uchar4 **inputImage,unsigned char **grayImage,
+void grayscale_preProcess(uchar4 **inputImage,unsigned char **grayImage,
                 uchar4 **d_rgbaImage,unsigned char **d_grayImage,
                 const string &filename){
 
@@ -50,6 +52,7 @@ void preProcess(uchar4 **inputImage,unsigned char **grayImage,
   checkCudaErrors(
     cudaMalloc(d_grayImage,sizeof(uchar4)*numPixels)
   );
+
   cudaMemset(*d_grayImage,0,numPixels*sizeof(unsigned char));
 
   //Copiamos el input en la gpu
@@ -62,4 +65,30 @@ void preProcess(uchar4 **inputImage,unsigned char **grayImage,
 
   d_rgbaImage__ = *d_rgbaImage;
   d_grayImage__ = *d_grayImage;
+}
+
+void sobel_preProcess(unsigned char **edgeImage, unsigned char **d_edgeImage,
+                  char **h_convolutionKernel, char **d_convolutionKernel){
+  const size_t numPixels = imageRGBA.rows * imageRGBA.cols;
+  imageEdge.create(imageRGBA.rows,imageRGBA.cols,CV_8UC1);
+
+  *edgeImage = imageEdge.ptr<unsigned char>(0);
+
+  checkCudaErrors(
+    cudaMalloc(d_edgeImage,sizeof(uchar4)*numPixels)
+  );
+  checkCudaErrors(
+    cudaMalloc(d_convolutionKernel,sizeof(char)*CONV_KERNEL_SIZE)
+  );
+
+  checkCudaErrors(
+    cudaMemcpy(*d_convolutionKernel,
+              *h_convolutionKernel,
+              sizeof(char)*CONV_KERNEL_SIZE,
+              cudaMemcpyHostToDevice)
+  );
+
+  cudaMemset(*d_edgeImage,0,numPixels*sizeof(unsigned char));
+
+  d_edgeImage__ = *d_edgeImage;
 }

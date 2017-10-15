@@ -6,19 +6,19 @@
 
 #IncludeRegexTransform: 
 
-/home/david/Projects/c/cuda/edge_detection/global/main.cpp
+/home/david/Projects/c/cuda/edge-detection/global/main.cpp
 iostream
 -
 utils.h
-/home/david/Projects/c/cuda/edge_detection/global/utils.h
+/home/david/Projects/c/cuda/edge-detection/global/utils.h
 string
 -
 stdio.h
 -
 preprocess.cpp
-/home/david/Projects/c/cuda/edge_detection/global/preprocess.cpp
+/home/david/Projects/c/cuda/edge-detection/global/preprocess.cpp
 
-/home/david/Projects/c/cuda/edge_detection/global/preprocess.cpp
+/home/david/Projects/c/cuda/edge-detection/global/preprocess.cpp
 opencv2/core/core.hpp
 -
 opencv2/highgui/highgui.hpp
@@ -26,7 +26,7 @@ opencv2/highgui/highgui.hpp
 opencv2/opencv.hpp
 -
 utils.h
-/home/david/Projects/c/cuda/edge_detection/global/utils.h
+/home/david/Projects/c/cuda/edge-detection/global/utils.h
 cuda.h
 -
 cuda_runtime.h
@@ -34,7 +34,7 @@ cuda_runtime.h
 string
 -
 
-/home/david/Projects/c/cuda/edge_detection/global/utils.h
+/home/david/Projects/c/cuda/edge-detection/global/utils.h
 iostream
 -
 iomanip
