@@ -3,7 +3,8 @@
 #include <string>
 #include <stdio.h>
 
-#define CONV_KERNEL_SIZE 9
+#define CONV_KERNEL_SIZE 25
+
 //Declaramos las funciones de kernel
 void rgba_to_gray(uchar4 * const d_rgbaImage,
                   unsigned char* const d_grayImage,
@@ -21,9 +22,9 @@ void sobel_filter(unsigned char* const d_inputImage,
 #include "preprocess.cpp"
 
 //Declaramos las funciones que cargan el kernel de convolucion
-void loadConvolutionKernel(char option,char *conv_kernel){
+void loadConvolutionKernel(int option,char *conv_kernel){
   switch(option){
-    case 'b'://Borde
+      case 3://3X3
       conv_kernel[0] = 0;
       conv_kernel[1] = 1;
       conv_kernel[2] = 0;
@@ -34,6 +35,37 @@ void loadConvolutionKernel(char option,char *conv_kernel){
       conv_kernel[7] = 1;
       conv_kernel[8] = 0;
       break;
+    case 5://5x5
+      conv_kernel[0] = 2;
+      conv_kernel[1] = 1;
+      conv_kernel[2] = 0;
+      conv_kernel[3] = -1;
+      conv_kernel[4] = -2;
+
+      conv_kernel[5] = 3;
+      conv_kernel[6] = 2;
+      conv_kernel[7] = 0;
+      conv_kernel[8] = -2;
+      conv_kernel[9] = -3;
+
+      conv_kernel[10] = 4;
+      conv_kernel[11] = 3;
+      conv_kernel[12] = 0;
+      conv_kernel[13] = -3;
+      conv_kernel[14] = -4;
+
+      conv_kernel[15] = 3;
+      conv_kernel[16] = 2;
+      conv_kernel[17] = 0;
+      conv_kernel[18] = -2;
+      conv_kernel[19] = -3;
+
+      conv_kernel[20] = 2;
+      conv_kernel[21] = 1;
+      conv_kernel[22] = 0;
+      conv_kernel[23] = -1;
+      conv_kernel[24] = -2;
+      break;
     default:
       cerr << "Kernel de convolucion indefinido" <<endl;
       return;
@@ -42,8 +74,13 @@ void loadConvolutionKernel(char option,char *conv_kernel){
 }
 
 int main(int argc,char** argv){
+  //Nombres de ficheros
   string input_file;
   string output_file;
+
+  //Variables de tiempo
+  clock_t startGPU, endGPU;
+  double gpu_time_used;
 
   //Imagenes
   uchar4 *h_rgbaImage, *d_rgbaImage;
@@ -68,14 +105,18 @@ int main(int argc,char** argv){
       exit(1);
   }
 
-  loadConvolutionKernel('b',h_convolutionKernel);
+  loadImage(input_file);
+
+  loadConvolutionKernel(5,h_convolutionKernel);
+
+  startGPU = clock();//Iniciamos el cronometro
 
   //Cargamos la imagen y preparamos los punteros de entrada y salida
   grayscale_preProcess( &h_rgbaImage,
               &h_grayImage,
               &d_rgbaImage,
               &d_grayImage,
-              input_file);
+              &h_edgeImage);
 
   size_t numPixels = imageRGBA.rows * imageRGBA.cols;
 
@@ -110,18 +151,23 @@ int main(int argc,char** argv){
     cudaMemcpy(h_edgeImage,d_edgeImage,sizeof(unsigned char)*numPixels,cudaMemcpyDeviceToHost)
   );
 
+  endGPU = clock();//Finalizamos el cronometro
+
+  gpu_time_used = ((double) (endGPU - startGPU)) / CLOCKS_PER_SEC;
+  printf("Tiempo Algoritmo Paralelo (global): %.10f\n",gpu_time_used);
+
   //Imagen de salida
   Mat output( imageRGBA.rows,
               imageRGBA.cols,
               CV_8UC1,
               (void*)h_edgeImage);
 
-  namedWindow("Display Window", WINDOW_AUTOSIZE);//Creamos una ventana para mostrar la imagen
+  //namedWindow("Display Window", WINDOW_AUTOSIZE);//Creamos una ventana para mostrar la imagen
 
   //Mostramos los resultados obtenidos
-  imshow("Display Window",output);//Mostramos la imagen
-  cvWaitKey(0);
-  cvDestroyWindow("Display Window");
+  //imshow("Display Window",output);//Mostramos la imagen
+  //cvWaitKey(0);
+  //cvDestroyWindow("Display Window");
 
   imwrite(output_file.c_str(),output);
 

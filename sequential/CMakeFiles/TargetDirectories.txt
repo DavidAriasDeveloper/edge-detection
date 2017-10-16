@@ -1,0 +1,3 @@
+/home/david/Projects/c/cuda/edge-detection/sequential/CMakeFiles/edit_cache.dir
+/home/david/Projects/c/cuda/edge-detection/sequential/CMakeFiles/rebuild_cache.dir
+/home/david/Projects/c/cuda/edge-detection/sequential/CMakeFiles/edge_detection.dir

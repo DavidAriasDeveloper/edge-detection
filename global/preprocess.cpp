@@ -19,13 +19,7 @@ unsigned char *d_edgeImage__;
 
 //Retorna un puntero de la version RGBA de la imagen de entrada y un puntero a la imagen de salida para host y gpu
 
-void grayscale_preProcess(uchar4 **inputImage,unsigned char **grayImage,
-                uchar4 **d_rgbaImage,unsigned char **d_grayImage,
-                const string &filename){
-
-  //Comprueba que el contexto se inicializa bien
-  checkCudaErrors(cudaFree(0));
-
+void loadImage(const string &filename){
   Mat image;
   image = imread(filename.c_str(),CV_LOAD_IMAGE_COLOR);//Leemos la imagen
 
@@ -38,12 +32,22 @@ void grayscale_preProcess(uchar4 **inputImage,unsigned char **grayImage,
 
   //Reservamos memoria para output
   imageGray.create(image.rows,image.cols,CV_8UC1);
+  imageEdge.create(imageRGBA.rows,imageRGBA.cols,CV_8UC1);
+}
+
+void grayscale_preProcess(uchar4 **inputImage,unsigned char **grayImage,
+                uchar4 **d_rgbaImage,unsigned char **d_grayImage,
+                unsigned char **edgeImage){
+
+  //Comprueba que el contexto se inicializa bien
+  checkCudaErrors(cudaFree(0));
+
+  const size_t numPixels = imageRGBA.rows * imageRGBA.cols;
 
   //Establecemos punteros (ptr limpia el objeto una vez destruidas todas las instancias)
   *inputImage = (uchar4 *)imageRGBA.ptr<unsigned char>(0);
   *grayImage = imageGray.ptr<unsigned char>(0);
-
-  const size_t numPixels = imageRGBA.rows * imageRGBA.cols;
+  *edgeImage = imageEdge.ptr<unsigned char>(0);
 
   //Reservamos memoria en el dispositivo
   checkCudaErrors(
@@ -70,9 +74,6 @@ void grayscale_preProcess(uchar4 **inputImage,unsigned char **grayImage,
 void sobel_preProcess(unsigned char **edgeImage, unsigned char **d_edgeImage,
                   char **h_convolutionKernel, char **d_convolutionKernel){
   const size_t numPixels = imageRGBA.rows * imageRGBA.cols;
-  imageEdge.create(imageRGBA.rows,imageRGBA.cols,CV_8UC1);
-
-  *edgeImage = imageEdge.ptr<unsigned char>(0);
 
   checkCudaErrors(
     cudaMalloc(d_edgeImage,sizeof(uchar4)*numPixels)
