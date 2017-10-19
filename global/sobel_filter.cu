@@ -3,7 +3,7 @@
 #include "math.h"
 
 #define TILE_SIZE 32
-#define MASK_WIDTH 5
+#define MASK_WIDTH 3
 
 //Maximo de hilos por bloque en GTX 970
 #define TxB 1024

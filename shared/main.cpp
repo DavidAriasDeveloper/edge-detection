@@ -3,7 +3,7 @@
 #include <string>
 #include <stdio.h>
 
-#define CONV_KERNEL_SIZE 25
+#define CONV_KERNEL_SIZE 9
 
 //Declaramos las funciones de kernel
 void rgba_to_gray(uchar4 * const d_rgbaImage,
@@ -13,7 +13,6 @@ void rgba_to_gray(uchar4 * const d_rgbaImage,
 
 void sobel_filter(unsigned char* const d_inputImage,
                   unsigned char* const d_outputImage,
-                  unsigned int maskWidth,
                   char *M,
                   size_t rows,
                   size_t cols);
@@ -25,15 +24,15 @@ void sobel_filter(unsigned char* const d_inputImage,
 void loadConvolutionKernel(int option,char *conv_kernel){
   switch(option){
       case 3://3X3
-      conv_kernel[0] = 0;
-      conv_kernel[1] = 1;
-      conv_kernel[2] = 0;
-      conv_kernel[3] = 1;
-      conv_kernel[4] = -4;
-      conv_kernel[5] = 1;
-      conv_kernel[6] = 0;
-      conv_kernel[7] = 1;
-      conv_kernel[8] = 0;
+      conv_kernel[0] = -1;
+      conv_kernel[1] = 0;
+      conv_kernel[2] = 1;
+      conv_kernel[3] = -2;
+      conv_kernel[4] = 0;
+      conv_kernel[5] = 2;
+      conv_kernel[6] = -1;
+      conv_kernel[7] = 0;
+      conv_kernel[8] = 1;
       break;
     case 5://5x5
       conv_kernel[0] = 2;
@@ -107,7 +106,7 @@ int main(int argc,char** argv){
 
   loadImage(input_file);
 
-  loadConvolutionKernel(5,h_convolutionKernel);
+  loadConvolutionKernel(sqrt(CONV_KERNEL_SIZE),h_convolutionKernel);
 
   startGPU = clock();//Iniciamos el cronometro
 
@@ -142,7 +141,6 @@ int main(int argc,char** argv){
 
   sobel_filter(     d_grayImage,
                     d_edgeImage,
-                    sqrt(CONV_KERNEL_SIZE),
                     d_convolutionKernel,
                     imageRGBA.rows,
                     imageRGBA.cols);
