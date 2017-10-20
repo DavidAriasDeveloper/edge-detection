@@ -11,4 +11,7 @@ export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64/${LD_LIBRARY_PATH:+:${LD_LIBRAR
 
 export CUDA_VISIBLE_DEVICES=0
 
-./edge_detection felicity_ultra.jpg
+for i in {0..20}
+do
+    ./edge_detection felicity_ultra.jpg
+done

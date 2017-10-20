@@ -23,22 +23,24 @@ __global__ void sobel_filter_kernel(unsigned char* const inputImage,
   //La variable compartida por bloque va a ser el trozo de la imagen a multiplicar
   __shared__ float N_ds[TILE_SIZE + MASK_WIDTH - 1][TILE_SIZE+ MASK_WIDTH - 1];
 
-  int n = MASK_WIDTH/2;
-  int dest = threadIdx.y*TILE_SIZE+threadIdx.x;
-  int destY=dest/(TILE_SIZE+MASK_WIDTH-1);
-  int destX = dest % (TILE_SIZE+MASK_WIDTH-1);
-  int srcY = blockIdx.y * TILE_SIZE + destY - n;
-  int srcX = blockIdx.x * TILE_SIZE + destX - n;
-  int src = (srcY * cols + srcX);
+  int n = MASK_WIDTH/2;//Mitad de la mascara para referencias
+  int dest = threadIdx.y*TILE_SIZE+threadIdx.x;//Pixel unidimiensional de destino del trozo
+  int destY=dest/(TILE_SIZE+MASK_WIDTH-1);//Coordenada y del pixel unidimiensional de destino del trozo
+  int destX = dest % (TILE_SIZE+MASK_WIDTH-1);//Coordenada x del pixel unidimiensional de destino del trozo
+  int srcY = blockIdx.y * TILE_SIZE + destY - n;//Coordenada del pixel unidimiensional de la imagen fuente (Iniciando desde la mascara)
+  int srcX = blockIdx.x * TILE_SIZE + destX - n;//Coordenada del pixel unidimiensional de la imagen fuente (Iniciando desde la mascara)
+  int src = (srcY * cols + srcX);//Coordenada del pixel unidimiensional de la imagen fuente
 
-  if (srcY >= 0 && srcY < rows && srcX >= 0 && srcX < cols)
-        N_ds[destY][destX] = inputImage[src];
+  /*** Carga de la variable compartida ***/
+  if (srcY >= 0 && srcY < rows && srcX >= 0 && srcX < cols)//Si la Coordenada de la imagen se encuentra entre los limites
+        N_ds[destY][destX] = inputImage[src];//Nuestro trozo de imagen se actualizara
     else
-        N_ds[destY][destX] = 0;
+        N_ds[destY][destX] = 0;//Sino, se le da un valor de negro
 
-    // Second batch loading
-    dest = threadIdx.y * TILE_SIZE + threadIdx.x + TILE_SIZE * TILE_SIZE;
-    destY = dest /(TILE_SIZE + MASK_WIDTH - 1), destX = dest % (TILE_SIZE + MASK_WIDTH - 1);
+
+    dest = threadIdx.y * TILE_SIZE + threadIdx.x + (TILE_SIZE * TILE_SIZE);
+    destY = dest /(TILE_SIZE + MASK_WIDTH - 1);
+    destX = dest % (TILE_SIZE + MASK_WIDTH - 1);
     srcY = blockIdx.y * TILE_SIZE + destY - n;
     srcX = blockIdx.x * TILE_SIZE + destX - n;
     src = (srcY * cols + srcX);
@@ -50,6 +52,7 @@ __global__ void sobel_filter_kernel(unsigned char* const inputImage,
     }
     __syncthreads();
 
+    /** Multiplicacion de trozo de imagen por kernel de convolucion **/
     int accum = 0;
     int y, x;
     for (y = 0; y < MASK_WIDTH; y++)
