@@ -13,5 +13,5 @@ export CUDA_VISIBLE_DEVICES=0
 
 for i in {0..20}
 do
-    ./edge_detection felicity_ultra.jpg
+    ./edge_detection luke_medium.png
 done
